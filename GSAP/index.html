@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>GSAP Subtle Logarithmic Swirling Lines with Twist</title>
+  <style>
+    body { margin: 0; background: #F0F0F0; overflow: hidden; }
+    .line {
+      width: 2px;
+      height: 20px;
+      background: #333333;
+      position: absolute;
+      transform-origin: center;
+    }
+  </style>
+</head>
+<body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script>
+    const gridSize = 20;
+    const spacing = 30;
+    const lines = [];
+    const centerX = (gridSize * spacing) / 2 + 20;
+    const centerY = (gridSize * spacing) / 2 + 20;
+
+    for (let x = 0; x < gridSize; x++) {
+      for (let y = 0; y < gridSize; y++) {
+        const line = document.createElement('div');
+        line.className = 'line';
+        const posX = x * spacing + 20;
+        const posY = y * spacing + 20;
+        line.style.left = posX + 'px';
+        line.style.top = posY + 'px';
+        document.body.appendChild(line);
+
+        // Initial subtler logarithmic swirl
+        const dx = posX - centerX;
+        const dy = posY - centerY;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+        const swirlAngle = 90 * Math.log(1 + distance * 0.005); // Reduced intensity
+        gsap.set(line, { rotation: angle + swirlAngle });
+
+        lines.push(line);
+      }
+    }
+
+    let mouseX = 0, mouseY = 0;
+    let time = 0;
+    document.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      time += 0.1;
+      lines.forEach((line) => {
+        const rect = line.getBoundingClientRect();
+        const dx = mouseX - (rect.left + rect.width / 2);
+        const dy = mouseY - (rect.top + rect.height / 2);
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+        const influence = Math.max(0, 1 - distance / 200);
+        const swirlAngle = 90 * Math.log(1 + distance * 0.005) * influence; // Reduced intensity
+        const twist = Math.sin(time + distance * 0.1) * 30 * influence;
+        const scale = 1 + Math.sin(time * 2 + distance * 0.1) * 0.2 * influence;
+        gsap.to(line, {
+          rotation: angle + swirlAngle + twist,
+          scaleY: scale,
+          duration: 0.3,
+          ease: "power2.out"
+        });
+      });
+    });
+
+    document.addEventListener('mouseleave', () => {
+      lines.forEach((line) => {
+        const rect = line.getBoundingClientRect();
+        const dx = centerX - (rect.left + rect.width / 2);
+        const dy = centerY - (rect.top + rect.height / 2);
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+        const swirlAngle = 90 * Math.log(1 + distance * 0.005);
+        gsap.to(line, {
+          rotation: angle + swirlAngle,
+          scaleY: 1,
+          duration: 0.5,
+          ease: "power2.out"
+        });
+      });
+    });
+  </script>
+</body>
+</html>
+
+<!-- another swirl -->
+
+<!-- <!DOCTYPE html>
+<html>
+<head>
+  <title>GSAP Cursor-Directed Swirling Lines with Localized Movement</title>
+  <style>
+    body { margin: 0; background: #F0F0F0; overflow: hidden; }
+    .line {
+      width: 2px;
+      height: 20px;
+      background: #333333;
+      position: absolute;
+      transform-origin: center;
+    }
+  </style>
+</head>
+<body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script>
+    const gridSize = 20;
+    const spacing = 30;
+    const lines = [];
+    const centerX = (gridSize * spacing) / 2 + 20;
+    const centerY = (gridSize * spacing) / 2 + 20;
+    const moveRadius = 100;
+
+    for (let x = 0; x < gridSize; x++) {
+      for (let y = 0; y < gridSize; y++) {
+        const line = document.createElement('div');
+        line.className = 'line';
+        const posX = x * spacing + 20;
+        const posY = y * spacing + 20;
+        line.style.left = posX + 'px';
+        line.style.top = posY + 'px';
+        document.body.appendChild(line);
+
+        const dx = posX - centerX;
+        const dy = posY - centerY;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+        const swirlAngle = 120 * Math.log(1 + distance * 0.01);
+        const direction = -1; // Initial counterclockwise swirl
+        gsap.set(line, { rotation: angle + direction * swirlAngle });
+
+        lines.push({ element: line, initialRotation: angle + direction * swirlAngle, isMoving: false });
+      }
+    }
+
+    let mouseX = 0, mouseY = 0;
+    let prevMouseX = 0, prevMouseY = 0;
+    let time = 0;
+    document.addEventListener('mousemove', (e) => {
+      prevMouseX = mouseX;
+      prevMouseY = mouseY;
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      time += 0.02;
+
+      // Determine swirl direction based on cursor movement
+      const deltaX = mouseX - prevMouseX;
+      const direction = deltaX > 0 ? -1 : deltaX < 0 ? 1 : -1; // Counterclockwise if moving right, clockwise if moving left
+
+      lines.forEach((line) => {
+        const rect = line.element.getBoundingClientRect();
+        const dx = mouseX - (rect.left + rect.width / 2);
+        const dy = mouseY - (rect.top + rect.height / 2);
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const influence = Math.max(0, 1 - distance / moveRadius);
+
+        if (distance < moveRadius) {
+          line.isMoving = true;
+          const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+          const swirlAngle = 120 * Math.log(1 + distance * 0.01) * influence;
+          const twist = Math.sin(time * 0.2 + distance * 0.02) * 5 * influence;
+          const scale = 1 + Math.sin(time * 0.2 + distance * 0.02) * 0.1 * influence;
+          gsap.to(line.element, {
+            rotation: angle + direction * swirlAngle + twist,
+            scaleY: scale,
+            duration: 1.0,
+            ease: "power2.out"
+          });
+        } else if (line.isMoving) {
+          line.isMoving = false;
+          gsap.to(line.element, {
+            rotation: line.initialRotation,
+            scaleY: 1,
+            duration: 1.0,
+            ease: "power2.out"
+          });
+        }
+      });
+    });
+
+    document.addEventListener('mouseleave', () => {
+      lines.forEach((line) => {
+        if (line.isMoving) {
+          line.isMoving = false;
+          gsap.to(line.element, {
+            rotation: line.initialRotation,
+            scaleY: 1,
+            duration: 1.0,
+            ease: "power2.out"
+          });
+        }
+      });
+    });
+  </script>
+</body>
+</html> -->

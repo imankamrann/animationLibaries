@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Vanta.js Moving Lines</title>
+  <style>
+    body { margin: 0; }
+    #vanta-canvas { width: 100vw; height: 100vh; }
+  </style>
+</head>
+<body>
+  <div id="vanta-canvas"></div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vanta@0.5.24/dist/vanta.net.min.js"></script>
+  <script>
+    VANTA.NET({
+      el: "#vanta-canvas",
+      mouseControls: true,
+      touchControls: true,
+      gyroControls: false,
+      minHeight: 200.00,
+      minWidth: 200.00,
+      scale: 1.00,
+      scaleMobile: 1.00,
+      color: 0x333333,
+      backgroundColor: 0xF0F0F0,
+      points: 15.00,
+      maxDistance: 20.00,
+      spacing: 15.00
+    });
+  </script>
+</body>
+</html>

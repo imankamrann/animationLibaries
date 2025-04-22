@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Lottie Subtle Logarithmic Swirling Lines with Twist</title>
+  <style>
+    body { margin: 0; background: #F0F0F0; overflow: hidden; }
+    .lottie-container {
+      width: 30px;
+      height: 30px;
+      position: absolute;
+      transform: translate(-50%, -50%);
+    }
+  </style>
+</head>
+<body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.10.2/lottie.min.js"></script>
+  <script>
+    const gridSize = 20;
+    const spacing = 30;
+    const containers = [];
+    const centerX = (gridSize * spacing) / 2 + 20;
+    const centerY = (gridSize * spacing) / 2 + 20;
+
+    for (let x = 0; x < gridSize; x++) {
+      for (let y = 0; y < gridSize; y++) {
+        const container = document.createElement('div');
+        container.className = 'lottie-container';
+        const posX = x * spacing + 20;
+        const posY = y * spacing + 20;
+        container.style.left = posX + 'px';
+        container.style.top = posY + 'px';
+        document.body.appendChild(container);
+        const anim = lottie.loadAnimation({
+          container: container,
+          renderer: 'svg',
+          loop: true,
+          autoplay: true,
+          path: 'https://assets.lottiefiles.com/packages/lf20_kxdh1hde.json'
+        });
+
+        const dx = posX - centerX;
+        const dy = posY - centerY;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+        const swirlAngle = 90 * Math.log(1 + distance * 0.005); // Reduced intensity
+        container.style.transform = `translate(-50%, -50%) rotate(${angle + swirlAngle}deg)`;
+
+        containers.push({ container, anim });
+      }
+    }
+
+    let isHovering = false;
+    let time = 0;
+    document.addEventListener('mousemove', (e) => {
+      const mouseX = e.clientX;
+      const mouseY = e.clientY;
+      isHovering = true;
+      time += 0.1;
+      containers.forEach(({ container }) => {
+        const rect = container.getBoundingClientRect();
+        const dx = mouseX - (rect.left + rect.width / 2);
+        const dy = mouseY - (rect.top + rect.height / 2);
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+        const influence = Math.max(0, 1 - distance / 200);
+        const swirlAngle = 90 * Math.log(1 + distance * 0.005) * influence; // Reduced intensity
+        const twist = Math.sin(time + distance * 0.1) * 30 * influence;
+        const scale = 1 + Math.sin(time * 2 + distance * 0.1) * 0.2 * influence;
+        container.style.transform = `translate(-50%, -50%) rotate(${angle + swirlAngle + twist}deg) scaleY(${scale})`;
+      });
+    });
+
+    document.addEventListener('mouseleave', () => {
+      isHovering = false;
+      containers.forEach(({ container }) => {
+        const rect = container.getBoundingClientRect();
+        const dx = centerX - (rect.left + rect.width / 2);
+        const dy = centerY - (rect.top + rect.height / 2);
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+        const swirlAngle = 90 * Math.log(1 + distance * 0.005);
+        container.style.transform = `translate(-50%, -50%) rotate(${angle + swirlAngle}deg) scaleY(1)`;
+      });
+    });
+  </script>
+</body>
+</html>
